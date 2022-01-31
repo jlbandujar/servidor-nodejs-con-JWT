@@ -1,15 +1,21 @@
 const express = require('express');
 require('dotenv').config();
+const { dbConnection } = require('../database/config')
+
 const port = process.env.PORT;
 class Server {
     constructor(){
         this.app = express();
+        this.conectarDB();
         this.middlewares();
         this.rutas();
     }
     middlewares(){
         this.app.use(express.json());
         this.app.use(express.static('public'));
+    }
+    async conectarDB(){
+        await dbConnection()
     }
     rutas(){
     this.app.get('/', function (req, res) {
