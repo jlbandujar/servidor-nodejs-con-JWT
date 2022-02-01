@@ -1,7 +1,6 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,6 +11,17 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^14.2.0",
-    "express": "^4.17.2"
-  }
+    "express": "^4.17.2",
+    "mongoose": "^6.1.9"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jlbandujar/servidor-nodejs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jlbandujar/servidor-nodejs/issues"
+  },
+  "homepage": "https://github.com/jlbandujar/servidor-nodejs#readme",
+  "description": ""
 }
