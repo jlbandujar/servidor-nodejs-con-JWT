@@ -1,6 +1,7 @@
 const express = require('express');
 require('dotenv').config();
 const { dbConnection } = require('../database/config')
+const Usuario = require('./usuario');
 
 const port = process.env.PORT;
 class Server {
@@ -35,10 +36,12 @@ class Server {
 
     this.app.post('/api', function (req, res) {
             const body = req.body;
+            let usuario = new Usuario(body);
+            usuario.save();
             res.json({
                 ok:true,
                 msg: 'post API',
-                body
+                usuario
             })
           })
     this.app.put('/api/', function (req, res) {
