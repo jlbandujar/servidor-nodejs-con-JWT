@@ -2,7 +2,8 @@ const express = require('express');
 require('dotenv').config();
 const { dbConnection } = require('../database/config')
 const Usuario = require('./usuario');
-
+const bcryptjs = require('bcryptjs');
+const { body,validationResult,check} = require('express-validator');
 const port = process.env.PORT;
 class Server {
     constructor(){
@@ -34,9 +35,24 @@ class Server {
             res.send(`La suma de ${num1} y ${num2} es ${(num1)+(num2)}`)
           })
 
-    this.app.post('/api', function (req, res) {
+    this.app.post('/api',
+            body('correo').isEmail(),
+            check('nombre','El nombre es obligatorio').not().isEmpty(),
+            check('password','El password debe tener al menos 6 caracteres').isLength({min:6}),
+            check('rol','El rol no es válido').isIn(['ADMIN_ROLE','USER_ROLE']),
+            
+
+            function (req, res) {
             const body = req.body;
             let usuario = new Usuario(body);
+            //valida el correo
+            const erroresVal = validationResult(req);
+                if ( !erroresVal.isEmpty()){
+                    return res.status(400).json({ msg:erroresVal.array()});
+                }
+            //**** le hago el hash a la contraseña */
+            const salt = bcryptjs.genSaltSync();
+            usuario.password = bcryptjs.hashSync(usuario.password,salt)
             usuario.save();
             res.json({
                 ok:true,
