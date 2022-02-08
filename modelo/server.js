@@ -13,8 +13,10 @@ class Server {
         this.rutas();
     }
     middlewares(){
-        this.app.use(express.json());
+        this.app.use(express.json())//Middleware para leer json;
         this.app.use(express.static('public'));
+        //^Middleware para servir la carpeta public
+    
     }
     async conectarDB(){
         await dbConnection()
