@@ -2,6 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const { dbConnection } = require('../database/config')
 const Usuario = require('./usuario');
+const Rol = require('./rol');
 const bcryptjs = require('bcryptjs');
 const { body,validationResult,check} = require('express-validator');
 const port = process.env.PORT;
@@ -25,10 +26,12 @@ class Server {
     this.app.get('/', function (req, res) {
             res.send('Hola IES JUAN BOSCO')
           })
-    this.app.get('/api', function (req, res) {
+    this.app.get('/api', async function (req, res) {
+            let usuarios = await Usuario.find();
             res.status(403).json({
                 ok:true,
-                msg: 'get API'
+                msg: 'get API',
+                usuarios
             })
           })
     this.app.get('/suma', function (req, res) {
@@ -41,7 +44,25 @@ class Server {
             body('correo').isEmail(),
             check('nombre','El nombre es obligatorio').not().isEmpty(),
             check('password','El password debe tener al menos 6 caracteres').isLength({min:6}),
-            check('rol','El rol no es válido').isIn(['ADMIN_ROLE','USER_ROLE']),
+            //check('rol','El rol no es válido').isIn(['ADMIN_ROLE','USER_ROLE']),
+            check('rol').custom(
+                    async function(rol) {
+                        const existeRol = await Rol.findOne({rol});
+                        if (!existeRol ) {
+                            throw new Error(`El rol ${rol} no está en la BD`)
+                        }
+                    }
+
+            ),
+            check('correo').custom(
+                async function(correo) {
+                    const existeCorreo = await Usuario.findOne({correo});
+                    if (existeCorreo ) {
+                        throw new Error(`El correo ${correo} YA está en la BD`)
+                    }
+                }
+
+        ),
             
 
             function (req, res) {
@@ -62,15 +83,24 @@ class Server {
                 usuario
             })
           })
-    this.app.put('/api/', function (req, res) {
-        const id = req.query.id;
+    this.app.put('/api/:id', async function (req, res) {
+        const id = req.params.id;
+        let { password, ...resto } = req.body;
+        //**** le hago el hash a la contraseña */
+        const salt = bcryptjs.genSaltSync();
+        password = bcryptjs.hashSync(password,salt);
+        resto.password = password;
+        await Usuario.findByIdAndUpdate(id, resto);
             res.status(403).json({
                 ok:true,
                 msg: 'put API',
-                id
+                id,
+                resto
             })
           })
-    this.app.delete('/api', function (req, res) {
+    this.app.delete('/api/:id', async function (req, res) {
+            const id = req.params.id;
+            await Usuario.findByIdAndDelete(id);
             res.status(403).json({
                 ok:true,
                 msg: 'delete API'
