@@ -2,6 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const { dbConnection } = require('../database/config')
 const Usuario = require('./usuario');
+const Producto = require('./producto');
 const Rol = require('./rol');
 const bcryptjs = require('bcryptjs');
 const { body,validationResult,check} = require('express-validator');
@@ -17,14 +18,51 @@ class Server {
         this.app.use(express.json())//Middleware para leer json;
         this.app.use(express.static('public'));
         //^Middleware para servir la carpeta public
-    
     }
     async conectarDB(){
         await dbConnection()
     }
     rutas(){
+    /******* RUTAS DEL PRODUCTO *****/ 
+    this.app.get('/prod/:id', async function (req, res) {
+        const id = req.params.id;
+        let producto = await Producto.findById(id);
+        res.json(
+            producto
+
+        )
+      })
+    this.app.get('/prod', async function (req, res) {
+        let productos = await Producto.find();
+            res.json(
+            productos
+            //[{"categoria":"chucherias","id":30,"imagen":"chuches.jpg","nombre":"chupa chus de naranja","precio":0.0},{"categoria":"chucherias","id":31,"imagen":"chuches.jpg","nombre":"chicle de melón","precio":0.0},{"categoria":"postres","id":33,"imagen":"melon.jpg","nombre":"Melon de chino","precio":2.0},{"categoria":"postres","id":34,"imagen":"melon.jpg","nombre":"Melon de sapo","precio":2.0},{"categoria":"bebidas","id":35,"imagen":"burger/fanta.png","nombre":"Coca cola de melón","precio":3.0},{"categoria":"refrescos","id":38,"imagen":"sandia.jpg","nombre":"refresco de kiwi","precio":2.0},{"categoria":"bocadillos","id":39,"imagen":"cod-1659603340642614231-bocadillo.jfif","nombre":"Bocadillo de calamares","precio":5.0},{"categoria":"bebidas","id":40,"imagen":"cod-737444841162795513-bocata2.jpg","nombre":"cerveza","precio":2.0}]
+        )
+      })
+    this.app.post('/prod',function (req, res) {
+        const body = req.body;
+        let miProducto = new Producto(body);
+        miProducto.save();
+        res.json({
+            ok:true,
+            msg: 'post API productos',
+            miProducto
+        })
+      })
+      //put-productos
+      this.app.put('/prod/:id',async function (req, res) {
+        const body = req.body;
+        const id = req.params.id;
+        await Producto.findByIdAndUpdate(id,body);
+        res.json({
+            ok:true,
+            msg: 'post API productos',
+            body
+        })
+      })
+    /******* RUTAS DEL USUARIO */    
     this.app.get('/', function (req, res) {
-            res.send('Hola IES JUAN BOSCO')
+        
           })
     this.app.get('/api', async function (req, res) {
             let usuarios = await Usuario.find();
