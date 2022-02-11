@@ -17,5 +17,12 @@ const ProductoSchema = mongoose.Schema(
     }
 }
 )
+//sobreescribimos un método del Schema para modificar el objeto que exporta
+ProductoSchema.methods.toJSON = function() {
+    const { _id,...producto} = this.toObject() ;
+    producto.id=_id;
+    return producto;
+}
+
 let Producto = mongoose.model('Producto',ProductoSchema);
 module.exports = Producto;

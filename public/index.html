@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
+-->
 <html>
     <head>
         <title>TODO supply a title</title>
@@ -84,7 +88,7 @@
            function cargaProductos(){
            alert(getAbsolutePath());
            let tabla=document.getElementById("tablaProductos");
-           fetch(getAbsolutePath()+'prod/')
+           fetch(getAbsolutePath()+'webresources/generic/productos/')
                 .then(response => response.json())
                 .then(json => {console.log(json);
                 //bucle para eliminar todas las filas de la tabla
@@ -96,7 +100,7 @@
                      //document.getElementById("divProductos").innerHTML+=json[i].nombre;
                      let fila=document.createElement("tr");
                      let celdaId=document.createElement("td");
-                     celdaId.textContent=json[i]._id;
+                     celdaId.textContent=json[i].id;
                      let celdaNombre=document.createElement("td");
                      celdaNombre.textContent=json[i].nombre;
                      let celdaPrecio=document.createElement("td");
@@ -205,7 +209,7 @@
              cargaProductos();
          }
          function borraProductoPorId(idProducto){
-             fetch('http://localhost:8080/CrudProductos2021-22/webresources/generic/producto/'+idProducto, {
+             fetch(getAbsolutePath()+'webresources/generic/producto/'+idProducto, {
                 method: 'DELETE',
               });
               cargaProductos();
@@ -213,3 +217,6 @@
         </script>
     </body>
 </html>
+© 2022 GitHub, Inc.
+Terms
+Priva
