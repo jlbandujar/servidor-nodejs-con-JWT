@@ -6,6 +6,8 @@ const Producto = require('./producto');
 const Rol = require('./rol');
 const bcryptjs = require('bcryptjs');
 const { body,validationResult,check} = require('express-validator');
+const { generarJWT } = require('../helpers/generar-jwt');
+const { validarJWT } = require('../middleware/validar-jwt')
 const port = process.env.PORT;
 class Server {
     constructor(){
@@ -23,6 +25,40 @@ class Server {
         await dbConnection()
     }
     rutas(){
+    /******RUTA  DEL LOGIN  */
+        this.app.post('/login',
+            check('correo','·El correo no es correcto').isEmail(),
+            check('password','Es password es obligatorio').not().isEmpty()
+            ,  async (req, res = response) => {
+                //valida el correo
+                const erroresVal = validationResult(req);
+                if (!erroresVal.isEmpty()) {
+                    return res.status(400).json({ msg: erroresVal.array() });
+                }
+                let {correo,password} = req.body;
+                try {
+                    //verifica si el email existe
+                    const miusuario = await Usuario.findOne({correo});
+                    if (!miusuario) {
+                        res.status(400).json({msg:'Login incorrecto ( email ) ',correo})
+                    } else {
+                        //verifica contraseña
+                        const validPassword = bcryptjs.compareSync(password, miusuario.password);
+                        //const validPassword = true;
+                        if (!validPassword) {
+                            return res.status(400).json({ msg: 'Login incorrecto ( password )' })
+                        }
+                        //generarr el JWT
+                        //console.log('usuario id: ', miusuario.id);
+                        const token = await generarJWT(miusuario.id);
+                        res.json({ msg: 'Login Ok', id: miusuario.id, token })
+                    }
+                } catch (error) {
+                    console.log(error);
+                    res.status(500).json({ msg: 'Hable con el administrador' });
+                }            
+        })
+
     /******* RUTAS DEL PRODUCTO *****/ 
     this.app.get('/webresources/generic/productos/:id', async function (req, res) {
         const id = req.params.id;
@@ -145,7 +181,9 @@ class Server {
                 resto
             })
           })
-    this.app.delete('/api/:id', async function (req, res) {
+        this.app.delete('/api/:id', 
+        validarJWT,
+        async function (req, res) {
             const id = req.params.id;
             await Usuario.findByIdAndDelete(id);
             res.status(403).json({
